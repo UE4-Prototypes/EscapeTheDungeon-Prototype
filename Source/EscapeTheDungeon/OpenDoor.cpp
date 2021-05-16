@@ -1,6 +1,7 @@
 // Copyright Jonathan Justin Rampersad 2021
 
 #include "OpenDoor.h"
+
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/Actor.h"
@@ -21,7 +22,10 @@ void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	InitialYaw = GetOwner()->GetActorRotation().Yaw;
+	WorldRef = GetWorld();
+	OwningActorRef = GetOwner();
+
+	InitialYaw = OwningActorRef->GetActorRotation().Yaw;
 	OpenAngle += InitialYaw;
 	CurrentYaw = InitialYaw;
 
@@ -30,7 +34,7 @@ void UOpenDoor::BeginPlay()
 		UE_LOG(LogTemp, Error, TEXT("PressurePlate reference not made on: %s"), *GetOwner()->GetName());
 	}
 
-	PlayerActor = GetWorld()->GetFirstPlayerController()->GetPawn();
+	PlayerActor = WorldRef->GetFirstPlayerController()->GetPawn();
 }
 
 
@@ -42,11 +46,11 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 	if (PressurePlate && (PressurePlate->IsOverlappingActor(ActorThatOpens) || PressurePlate->IsOverlappingActor(PlayerActor)))
 	{
 		OpenDoor(DeltaTime);
-		DoorLastOpened = GetWorld()->GetTimeSeconds();
+		DoorLastOpened = WorldRef->GetTimeSeconds();
 	}
 	else
 	{
-		if (GetWorld()->GetTimeSeconds() - DoorLastOpened > DoorCloseDelay)
+		if (WorldRef->GetTimeSeconds() - DoorLastOpened > DoorCloseDelay)
 		{
 			CloseDoor(DeltaTime);
 		}
@@ -56,17 +60,17 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 void UOpenDoor::OpenDoor(float& DeltaTime)
 {
 	CurrentYaw = FMath::FInterpTo(CurrentYaw, OpenAngle, DeltaTime, DoorOpenSpeed);
-	FRotator DoorRot = GetOwner()->GetActorRotation();
+	FRotator DoorRot = OwningActorRef->GetActorRotation();
 
 	DoorRot.Yaw = CurrentYaw;
-	GetOwner()->SetActorRotation(DoorRot);
+	OwningActorRef->SetActorRotation(DoorRot);
 }
 
 void UOpenDoor::CloseDoor(float& DeltaTime)
 {
 	CurrentYaw = FMath::FInterpTo(CurrentYaw, InitialYaw, DeltaTime, DoorCloseSpeed);
-	FRotator DoorRot = GetOwner()->GetActorRotation();
+	FRotator DoorRot = OwningActorRef->GetActorRotation();
 
 	DoorRot.Yaw = CurrentYaw;
-	GetOwner()->SetActorRotation(DoorRot);
+	OwningActorRef->SetActorRotation(DoorRot);
 }

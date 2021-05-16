@@ -28,6 +28,9 @@ public:
 	void CloseDoor(float& DeltaTime);
 
 private:
+	UWorld* WorldRef;
+	AActor* OwningActorRef;
+
 	float InitialYaw;
 	float CurrentYaw;
 
