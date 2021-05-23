@@ -36,7 +36,10 @@ private:
 	UInputComponent* InputComponent = nullptr;
 	UPhysicsHandleComponent* PhysicsHandle = nullptr;
 
+	FVector PlayerViewPointLocation;
+	FRotator PlayerViewPointRotation;
 	float Reach = 100.f;
+	FVector LineTraceEnd;
 
 	void Grab();
 	void Release();
